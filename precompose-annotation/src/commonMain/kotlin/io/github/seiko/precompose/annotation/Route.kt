@@ -15,7 +15,8 @@ annotation class GeneratedRoute
 @Target(AnnotationTarget.FUNCTION)
 annotation class NavGraphDestination(
     val route: String,
-    val deepLink: Array<String> = [],
+    // [] not support for js
+    val deepLink: Array<String> = emptyArray(),
     val packageName: String = "",
     val functionName: String = "scene",
     // val generatedFunctionName: String = "generatedRoute",
