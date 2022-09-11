@@ -18,7 +18,7 @@ kotlin {
     mingwX64()
     watchosX64()
     watchosArm64()
-    js {
+    js(IR) {
         browser()
         nodejs()
     }
