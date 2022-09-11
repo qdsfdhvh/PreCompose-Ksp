@@ -13,7 +13,11 @@ rootProject.name = "precompose-ksp-root"
 include(
     ":precompose-annotation",
     ":precompose-ksp",
-    ":sample",
+    ":sample:core",
+    ":sample:feature:social",
+    ":sample:feature:wallet",
+    ":sample:app:common",
+    ":sample:app:desktop",
 )
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

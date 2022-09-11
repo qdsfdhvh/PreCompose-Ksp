@@ -5,6 +5,8 @@ plugins {
     id("com.android.application") version "7.2.2" apply false
     id("com.android.library") version "7.2.2" apply false
     kotlin("multiplatform") version "1.7.10" apply false
+    id("com.google.devtools.ksp") version "1.7.10-1.0.6" apply false
+    id("org.jetbrains.compose") version "1.2.0-alpha01-dev774" apply false
     id("com.vanniktech.maven.publish") version "0.20.0" apply false
 }
 
