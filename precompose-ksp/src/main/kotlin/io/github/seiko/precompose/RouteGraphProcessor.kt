@@ -88,7 +88,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
             "not find navigator in ${functionDeclaration.packageName}.$functionName"
         }
 
-        val fileBuilder = FileSpec.builder(packageName, "RouteGraph")
+        val fileBuilder = FileSpec.builder(packageName, functionName)
         destinations.forEach { destination ->
             generateDestination(
                 fileBuilder = fileBuilder,
@@ -208,22 +208,12 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                     )
                                 }
                                 it.isAnnotationPresent(Navigate::class) -> {
-                                    val target = it.getAnnotationsByType(Navigate::class).first().target
                                     val type = it.type.resolve()
                                     require(type.isFunctionType)
-                                    val declaration = type.declaration as KSClassDeclaration
-                                    val parameters = declaration.getDeclaredFunctions().first().parameters
-                                    val parameter = if (parameters.any()) {
-                                        "\\{(\\w+)}".toRegex().findAll(target).map { it.groups[1]?.value }
-                                            .joinToString(",") + " ->"
-                                    } else {
-                                        ""
-                                    }
                                     addStatement(
-                                        "%N = { $parameter %N.navigate(%P) },",
+                                        "%N = { uri -> %N.navigate(uri) },",
                                         it.name?.asString() ?: "",
                                         navigatorName,
-                                        target.replace("{", "\${")
                                     )
                                 }
                             }

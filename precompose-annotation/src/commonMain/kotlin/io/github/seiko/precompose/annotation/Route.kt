@@ -36,9 +36,7 @@ annotation class Query(
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class Navigate(
-    val target: String,
-)
+annotation class Navigate
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.VALUE_PARAMETER)
