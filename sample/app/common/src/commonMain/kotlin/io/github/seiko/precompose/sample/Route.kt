@@ -6,6 +6,8 @@ import io.github.seiko.precompose.demo.SocialRoute
 import io.github.seiko.precompose.demo.socialRoute
 import io.github.seiko.precompose.demo.walletRoute
 import moe.tlaster.precompose.navigation.NavHost
+import moe.tlaster.precompose.navigation.Navigator
+import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.rememberNavigator
 
 @Composable
@@ -16,7 +18,15 @@ fun Route(modifier: Modifier = Modifier) {
         initialRoute = SocialRoute.Profile,
         modifier = modifier,
     ) {
-        socialRoute(navigator)
-        walletRoute(navigator)
+        generateRoute(
+            navigator = navigator,
+            onBack = { navigator.goBack() },
+            onNavigate = { uri -> navigator.navigate(uri) },
+        )
     }
+}
+
+private fun RouteBuilder.generateRoute(navigator: Navigator, onBack: () -> Unit, onNavigate: (String) -> Unit) {
+    socialRoute(navigator, onNavigate = onNavigate)
+    walletRoute(navigator, onBack = onBack, onNavigate = onNavigate)
 }

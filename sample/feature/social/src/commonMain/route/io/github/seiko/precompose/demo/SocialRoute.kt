@@ -6,7 +6,7 @@ import moe.tlaster.precompose.navigation.RouteBuilder
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 @GeneratedRoute
-expect fun RouteBuilder.socialRoute(navigator: Navigator)
+expect fun RouteBuilder.socialRoute(navigator: Navigator, onNavigate: (String) -> Unit)
 
 object SocialRoute {
     const val Profile = "/social/profile"

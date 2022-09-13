@@ -71,20 +71,21 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                     .mapNotNull { it.toKModifier() }
             )
         }
-
-        var navigatorName = ""
-        logger.warn(functionDeclaration.parameters.joinToString { it.toString() })
+        val functionNames = NavigatorFunctionNames()
         functionDeclaration.parameters.forEach { parameter ->
             val name = parameter.name?.getShortName().orEmpty()
             val type = parameter.type.toTypeName()
-            if (type == navControllerType) {
-                navigatorName = name
+            when {
+                type == navControllerType -> functionNames.navigatorName = name
+                parameter.isAnnotationPresent(Back::class) -> functionNames.onBackName = name
+                parameter.isAnnotationPresent(Navigate::class) -> functionNames.onNavigateName = name
+                else -> Unit
             }
             functionBuilder.addParameter(
                 ParameterSpec.builder(name, type).build()
             )
         }
-        require(navigatorName.isNotEmpty()) {
+        require(functionNames.navigatorName.isNotEmpty()) {
             "not find navigator in ${functionDeclaration.packageName}.$functionName"
         }
 
@@ -94,7 +95,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                 fileBuilder = fileBuilder,
                 functionBuilder = functionBuilder,
                 destination = destination,
-                navigatorName = navigatorName,
+                functionNames = functionNames,
             )
         }
 
@@ -113,7 +114,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
         fileBuilder: FileSpec.Builder,
         functionBuilder: FunSpec.Builder,
         destination: KSFunctionDeclaration,
-        navigatorName: String,
+        functionNames: NavigatorFunctionNames,
     ) {
         val annotation = destination.getAnnotationsByType(NavGraphDestination::class).first()
 
@@ -184,7 +185,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                     addStatement(
                                         "%N = %N,",
                                         it.name?.asString() ?: "",
-                                        navigatorName
+                                        functionNames.navigatorName
                                     )
                                 }
                                 it.type.toTypeName() == navBackStackEntryType -> {
@@ -201,20 +202,36 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                     )
                                 }
                                 it.isAnnotationPresent(Back::class) -> {
-                                    addStatement(
-                                        "%N = { %N.popBackStack() },",
-                                        it.name?.asString() ?: "",
-                                        navigatorName
-                                    )
+                                    if (functionNames.onBackName.isNotEmpty()) {
+                                        addStatement(
+                                            "%N = %N,",
+                                            it.name?.asString() ?: "",
+                                            functionNames.onBackName,
+                                        )
+                                    } else {
+                                        addStatement(
+                                            "%N = { %N.popBackStack() },",
+                                            it.name?.asString() ?: "",
+                                            functionNames.navigatorName
+                                        )
+                                    }
                                 }
                                 it.isAnnotationPresent(Navigate::class) -> {
                                     val type = it.type.resolve()
                                     require(type.isFunctionType)
-                                    addStatement(
-                                        "%N = { uri -> %N.navigate(uri) },",
-                                        it.name?.asString() ?: "",
-                                        navigatorName,
-                                    )
+                                    if (functionNames.onNavigateName.isNotEmpty()) {
+                                        addStatement(
+                                            "%N = %N,",
+                                            it.name?.asString() ?: "",
+                                            functionNames.onNavigateName,
+                                        )
+                                    } else {
+                                        addStatement(
+                                            "%N = { uri -> %N.navigate(uri) },",
+                                            it.name?.asString() ?: "",
+                                            functionNames.navigatorName,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -227,3 +244,9 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
         functionBuilder.endControlFlow()
     }
 }
+
+private data class NavigatorFunctionNames(
+    var navigatorName: String = "",
+    var onBackName: String = "",
+    var onNavigateName: String = "",
+)
