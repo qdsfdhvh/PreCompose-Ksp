@@ -2,14 +2,12 @@ package io.github.seiko.precompose
 
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.FileSpec
@@ -32,7 +30,6 @@ import io.github.seiko.precompose.annotation.Query
 internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
     private val codeGenerator = environment.codeGenerator
-    private val logger = environment.logger
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val destinations = resolver
@@ -117,6 +114,9 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
         functionNames: NavigatorFunctionNames,
     ) {
         val annotation = destination.getAnnotationsByType(NavGraphDestination::class).first()
+        if (annotation.packageName.isNotEmpty()) {
+            fileBuilder.addImport(annotation.packageName, annotation.functionName)
+        }
 
         functionBuilder.addStatement("%L(", annotation.functionName)
         functionBuilder.addCode(
@@ -188,12 +188,14 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                         functionNames.navigatorName
                                     )
                                 }
+
                                 it.type.toTypeName() == navBackStackEntryType -> {
                                     addStatement(
                                         "%N = it,",
                                         it.name?.asString() ?: "",
                                     )
                                 }
+
                                 it.isAnnotationPresent(Query::class) || it.isAnnotationPresent(Path::class) -> {
                                     addStatement(
                                         "%N = %N,",
@@ -201,6 +203,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                         it.name?.asString() ?: ""
                                     )
                                 }
+
                                 it.isAnnotationPresent(Back::class) -> {
                                     if (functionNames.onBackName.isNotEmpty()) {
                                         addStatement(
@@ -216,6 +219,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                         )
                                     }
                                 }
+
                                 it.isAnnotationPresent(Navigate::class) -> {
                                     val type = it.type.resolve()
                                     require(type.isFunctionType)

@@ -49,6 +49,8 @@ fun WalletCollectibleScene(
 
 @NavGraphDestination(
     route = WalletRoute.Connect,
+    packageName = "io.github.seiko.precompose.demo",
+    functionName = "customScene",
 )
 @Composable
 fun WalletConnectScene(
