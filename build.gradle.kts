@@ -7,7 +7,7 @@ plugins {
     kotlin("multiplatform") version "1.7.20" apply false
     id("com.google.devtools.ksp") version "1.7.20-1.0.7" apply false
     id("org.jetbrains.compose") version "1.2.0" apply false
-    id("com.vanniktech.maven.publish") version "0.21.0" apply false
+    id("com.vanniktech.maven.publish") version "0.22.0" apply false
 }
 
 allprojects {
@@ -23,7 +23,7 @@ allprojects {
     plugins.withId("com.vanniktech.maven.publish.base") {
         @Suppress("UnstableApiUsage")
         configure<MavenPublishBaseExtension> {
-            publishToMavenCentral(SonatypeHost.S01)
+            publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
             signAllPublications()
             pom {
                 description.set("A route compiler for PreCompose (KSP).")
