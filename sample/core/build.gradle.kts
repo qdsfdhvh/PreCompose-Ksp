@@ -11,7 +11,7 @@ kotlin {
             kotlin.srcDir("src/commonMain/route")
             dependencies {
                 api(projects.precomposeAnnotation)
-                api("moe.tlaster:precompose:1.3.3")
+                api("moe.tlaster:precompose:1.3.8")
                 api(compose.material)
             }
         }
