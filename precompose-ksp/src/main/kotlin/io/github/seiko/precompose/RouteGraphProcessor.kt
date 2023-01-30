@@ -10,16 +10,20 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.buildCodeBlock
 import com.squareup.kotlinpoet.ksp.toKModifier
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.kotlinpoet.withIndent
 import io.github.seiko.precompose.annotation.Back
+import io.github.seiko.precompose.annotation.Meta
 import io.github.seiko.precompose.annotation.NavGraphDestination
 import io.github.seiko.precompose.annotation.Navigate
 import io.github.seiko.precompose.annotation.Path
@@ -102,8 +106,28 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                 codeGenerator,
                 Dependencies(
                     true,
-                    // *(destinations.mapNotNull { it.containingFile }).toTypedArray()
                 )
+            )
+
+        // META DATA
+
+        val metaData = "this is $functionName"
+
+        FileSpec.builder(META_PACKAGE_NAME, "meta$$functionName")
+            .addProperty(
+                PropertySpec.builder("voidProp", STRING, KModifier.INTERNAL)
+                    .addAnnotation(
+                        AnnotationSpec.builder(Meta::class)
+                            .addMember("%S", metaData)
+                            .build()
+                    )
+                    .initializer("%S", "")
+                    .build()
+            )
+            .build()
+            .writeTo(
+                codeGenerator,
+                Dependencies(true),
             )
     }
 

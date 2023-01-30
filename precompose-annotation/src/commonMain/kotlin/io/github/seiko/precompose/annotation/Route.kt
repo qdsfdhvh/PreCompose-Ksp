@@ -45,3 +45,9 @@ annotation class Navigate
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Back
+
+// DON'T USE, Just for ksp
+
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.PROPERTY)
+annotation class Meta(val metadata: String)
