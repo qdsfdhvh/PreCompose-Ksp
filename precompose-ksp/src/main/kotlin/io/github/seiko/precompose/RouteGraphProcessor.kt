@@ -20,11 +20,11 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.kotlinpoet.withIndent
 import io.github.seiko.precompose.annotation.Back
-import io.github.seiko.precompose.annotation.GeneratedRoute
 import io.github.seiko.precompose.annotation.NavGraphDestination
 import io.github.seiko.precompose.annotation.Navigate
 import io.github.seiko.precompose.annotation.Path
 import io.github.seiko.precompose.annotation.Query
+import io.github.seiko.precompose.annotation.RouteGraph
 
 @OptIn(KspExperimental::class)
 internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor {
@@ -40,8 +40,8 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
 
         val generates = resolver
             .getSymbolsWithAnnotation(
-                GeneratedRoute::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for GeneratedRoute")
+                RouteGraph::class.qualifiedName
+                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraph")
             ).filterIsInstance<KSFunctionDeclaration>()
 
         val ret = generates.filter { !it.validate() }.toList()

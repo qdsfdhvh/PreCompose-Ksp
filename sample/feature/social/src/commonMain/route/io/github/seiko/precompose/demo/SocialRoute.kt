@@ -1,11 +1,11 @@
 package io.github.seiko.precompose.demo
 
-import io.github.seiko.precompose.annotation.GeneratedRoute
+import io.github.seiko.precompose.annotation.RouteGraph
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.RouteBuilder
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-@GeneratedRoute
+@RouteGraph
 expect fun RouteBuilder.socialRoute(navigator: Navigator, onNavigate: (String) -> Unit)
 
 object SocialRoute {
