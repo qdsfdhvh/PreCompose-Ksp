@@ -1,2 +1,3 @@
 io.github.seiko.precompose.RouteProcessorProvider
 io.github.seiko.precompose.RouteGraphProcessorProvider
+io.github.seiko.precompose.RootRouteGraphProcessorProvider
