@@ -14,6 +14,9 @@ kotlin {
                 implementation(projects.sample.core)
             }
         }
+        val desktopMain by getting {
+            kotlin.srcDir("build/generated/ksp/desktop/desktopMain")
+        }
     }
 }
 

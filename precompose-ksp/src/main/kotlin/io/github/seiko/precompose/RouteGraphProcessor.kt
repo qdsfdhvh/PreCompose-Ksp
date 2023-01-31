@@ -10,22 +10,17 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.validate
-import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.buildCodeBlock
+import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import com.squareup.kotlinpoet.ksp.toKModifier
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.kotlinpoet.withIndent
-import io.github.seiko.precompose.annotation.Back
-import io.github.seiko.precompose.annotation.Meta
 import io.github.seiko.precompose.annotation.NavGraphDestination
-import io.github.seiko.precompose.annotation.Navigate
 import io.github.seiko.precompose.annotation.Path
 import io.github.seiko.precompose.annotation.Query
 import io.github.seiko.precompose.annotation.RouteGraph
@@ -36,108 +31,79 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
     private val codeGenerator = environment.codeGenerator
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val destinations = resolver
+        val scenes = resolver
             .getSymbolsWithAnnotation(
                 NavGraphDestination::class.qualifiedName
                     ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraphDestination")
             ).filterIsInstance<KSFunctionDeclaration>()
 
-        val generates = resolver
+        val routeGraphs = resolver
             .getSymbolsWithAnnotation(
                 RouteGraph::class.qualifiedName
                     ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraph")
             ).filterIsInstance<KSFunctionDeclaration>()
 
-        val ret = generates.filter { !it.validate() }.toList()
-        generates.filter { it.validate() }
-            .forEach { generateRoute(it, destinations.toList()) }
+        val ret = routeGraphs.filter { !it.validate() }.toList()
+        routeGraphs.filter { it.validate() }
+            .forEach { routeGraph ->
+                generateRouteGraph(routeGraph, scenes.toList())
+                generateRouteGraphMetaData(routeGraph)
+            }
         return ret
     }
 
-    private fun generateRoute(
-        functionDeclaration: KSFunctionDeclaration,
-        destinations: List<KSFunctionDeclaration>,
+    private fun generateRouteGraph(
+        routeGraph: KSFunctionDeclaration,
+        scenes: List<KSFunctionDeclaration>,
     ) {
-        val packageName = functionDeclaration.packageName.asString()
-        val functionName = functionDeclaration.qualifiedName?.getShortName() ?: "<ERROR>"
+        val packageName = routeGraph.packageName.asString()
+        val functionName = routeGraph.simpleName.asString()
 
         val functionBuilder = FunSpec.builder(functionName)
-            .receiver(routeBuilderType)
+            .apply {
+                routeGraph.extensionReceiver?.let {
+                    receiver(it.toTypeName())
+                }
+            }
 
-        if (functionDeclaration.modifiers.isNotEmpty()) {
+        if (routeGraph.modifiers.isNotEmpty()) {
             functionBuilder.addModifiers(KModifier.ACTUAL)
             functionBuilder.addModifiers(
-                functionDeclaration.modifiers
+                routeGraph.modifiers
                     .filter { it.name != KModifier.EXPECT.name }
                     .mapNotNull { it.toKModifier() }
             )
         }
-        val functionNames = NavigatorFunctionNames()
-        functionDeclaration.parameters.forEach { parameter ->
-            val name = parameter.name?.getShortName().orEmpty()
-            val type = parameter.type.toTypeName()
-            when {
-                type == navControllerType -> functionNames.navigatorName = name
-                parameter.isAnnotationPresent(Back::class) -> functionNames.onBackName = name
-                parameter.isAnnotationPresent(Navigate::class) -> functionNames.onNavigateName = name
-                else -> Unit
-            }
-            functionBuilder.addParameter(
-                ParameterSpec.builder(name, type).build()
-            )
-        }
+
+        val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
+            routeGraph.parameters
+        )
         require(functionNames.navigatorName.isNotEmpty()) {
-            "not find navigator in ${functionDeclaration.packageName}.$functionName"
+            "not find navigator in ${routeGraph.packageName}.$functionName"
         }
 
         val fileBuilder = FileSpec.builder(packageName, functionName)
-        destinations.forEach { destination ->
-            generateDestination(
+        scenes.forEach { scene ->
+            generateScene(
                 fileBuilder = fileBuilder,
                 functionBuilder = functionBuilder,
-                destination = destination,
                 functionNames = functionNames,
+                scene = scene,
             )
         }
 
         fileBuilder.addFunction(functionBuilder.build())
             .build()
-            .writeTo(
-                codeGenerator,
-                Dependencies(
-                    true,
-                )
-            )
-
-        // META DATA
-
-        val metaData = "this is $functionName"
-
-        FileSpec.builder(META_PACKAGE_NAME, "meta$$functionName")
-            .addProperty(
-                PropertySpec.builder("voidProp", STRING, KModifier.INTERNAL)
-                    .addAnnotation(
-                        AnnotationSpec.builder(Meta::class)
-                            .addMember("%S", metaData)
-                            .build()
-                    )
-                    .initializer("%S", "")
-                    .build()
-            )
-            .build()
-            .writeTo(
-                codeGenerator,
-                Dependencies(true),
-            )
+            .writeTo(codeGenerator, Dependencies(true))
     }
 
-    private fun generateDestination(
+    private fun generateScene(
         fileBuilder: FileSpec.Builder,
         functionBuilder: FunSpec.Builder,
-        destination: KSFunctionDeclaration,
         functionNames: NavigatorFunctionNames,
+        scene: KSFunctionDeclaration,
     ) {
-        val annotation = destination.getAnnotationsByType(NavGraphDestination::class).first()
+        val annotation = scene.getAnnotationsByType(NavGraphDestination::class).first()
         if (annotation.packageName.isNotEmpty()) {
             fileBuilder.addImport(annotation.packageName, annotation.functionName)
         }
@@ -163,8 +129,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
             }
         )
         functionBuilder.beginControlFlow(")")
-
-        destination.parameters.forEach {
+        scene.parameters.forEach {
             if (it.isAnnotationPresent(Path::class)) {
                 require(!it.type.resolve().isMarkedNullable)
             }
@@ -191,90 +156,59 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                 )
             }
         }
+        functionBuilder.addNavigateParameters(
+            fileBuilder = fileBuilder,
+            functionNames = functionNames,
+            functionDeclaration = scene,
+        )
+        functionBuilder.endControlFlow()
+    }
 
-        if (destination.packageName.asString() != fileBuilder.packageName) {
-            fileBuilder.addImport(
-                destination.packageName.asString(),
-                destination.simpleName.asString(),
+    private fun generateRouteGraphMetaData(
+        functionDeclaration: KSFunctionDeclaration,
+    ) {
+        val functionName = functionDeclaration.simpleName.asString()
+
+        FileSpec.builder(META_PACKAGE_NAME, "meta$$functionName")
+            .addImport(
+                functionDeclaration.packageName.asString(),
+                functionName,
             )
-        }
-        functionBuilder.addStatement("%L(", destination)
-        functionBuilder.addCode(
-            buildCodeBlock {
-                if (destination.parameters.isNotEmpty()) {
-                    withIndent {
-                        destination.parameters.forEach {
-                            when {
-                                it.type.toTypeName() == navControllerType -> {
-                                    addStatement(
-                                        "%N = %N,",
-                                        it.name?.asString() ?: "",
-                                        functionNames.navigatorName
-                                    )
-                                }
-
-                                it.type.toTypeName() == navBackStackEntryType -> {
-                                    addStatement(
-                                        "%N = it,",
-                                        it.name?.asString() ?: "",
-                                    )
-                                }
-
-                                it.isAnnotationPresent(Query::class) || it.isAnnotationPresent(Path::class) -> {
-                                    addStatement(
-                                        "%N = %N,",
-                                        it.name?.asString() ?: "",
-                                        it.name?.asString() ?: ""
-                                    )
-                                }
-
-                                it.isAnnotationPresent(Back::class) -> {
-                                    if (functionNames.onBackName.isNotEmpty()) {
-                                        addStatement(
-                                            "%N = %N,",
-                                            it.name?.asString() ?: "",
-                                            functionNames.onBackName,
-                                        )
-                                    } else {
-                                        addStatement(
-                                            "%N = { %N.popBackStack() },",
-                                            it.name?.asString() ?: "",
-                                            functionNames.navigatorName
-                                        )
+            .addFunction(
+                FunSpec.builder(functionName)
+                    .receiver(functionDeclaration.extensionReceiver!!.toTypeName())
+                    .addParameters(
+                        functionDeclaration.parameters.map {
+                            ParameterSpec.builder(it.name!!.asString(), it.type.toTypeName())
+                                .apply {
+                                    it.annotations.forEach { annotation ->
+                                        addAnnotation(annotation.toAnnotationSpec())
                                     }
                                 }
-
-                                it.isAnnotationPresent(Navigate::class) -> {
-                                    val type = it.type.resolve()
-                                    require(type.isFunctionType)
-                                    if (functionNames.onNavigateName.isNotEmpty()) {
-                                        addStatement(
-                                            "%N = %N,",
-                                            it.name?.asString() ?: "",
-                                            functionNames.onNavigateName,
-                                        )
-                                    } else {
-                                        addStatement(
-                                            "%N = { uri -> %N.navigate(uri) },",
-                                            it.name?.asString() ?: "",
-                                            functionNames.navigatorName,
-                                        )
-                                    }
+                                .build()
+                        }
+                    )
+                    .addStatement(
+                        "%L(",
+                        functionName,
+                    )
+                    .addCode(
+                        buildCodeBlock {
+                            withIndent {
+                                functionDeclaration.parameters.forEach {
+                                    addStatement(
+                                        "%L = %L,",
+                                        it.name!!.asString(),
+                                        it.name!!.asString(),
+                                    )
                                 }
                             }
                         }
-                    }
-                }
-            }
-        )
-        functionBuilder.addStatement(")")
-
-        functionBuilder.endControlFlow()
+                    )
+                    .addStatement(")")
+                    .build()
+            )
+            .build()
+            .writeTo(codeGenerator, Dependencies(true))
     }
 }
-
-private data class NavigatorFunctionNames(
-    var navigatorName: String = "",
-    var onBackName: String = "",
-    var onNavigateName: String = "",
-)

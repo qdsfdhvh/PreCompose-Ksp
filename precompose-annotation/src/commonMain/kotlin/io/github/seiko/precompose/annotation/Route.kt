@@ -38,16 +38,12 @@ annotation class Query(
     val name: String = "",
 )
 
-@Retention(AnnotationRetention.SOURCE)
+// Because of cc, following annotations retention to binary
+
+@Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Navigate
 
-@Retention(AnnotationRetention.SOURCE)
+@Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Back
-
-// DON'T USE, Just for ksp
-
-@Retention(AnnotationRetention.SOURCE)
-@Target(AnnotationTarget.PROPERTY)
-annotation class Meta(val metadata: String)

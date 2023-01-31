@@ -10,10 +10,12 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir("src/commonMain/route")
-            kotlin.srcDir("src/build/generated/ksp/desktop")
             dependencies {
                 implementation(projects.sample.core)
             }
+        }
+        val desktopMain by getting {
+            kotlin.srcDir("build/generated/ksp/desktop/desktopMain")
         }
     }
 }
