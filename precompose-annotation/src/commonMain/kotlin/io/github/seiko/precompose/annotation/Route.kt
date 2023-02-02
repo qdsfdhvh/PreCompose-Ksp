@@ -9,7 +9,11 @@ annotation class Route(
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FUNCTION)
-annotation class GeneratedRoute
+annotation class RouteGraph
+
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.FUNCTION)
+annotation class RootRouteGraph
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FUNCTION)
@@ -34,10 +38,12 @@ annotation class Query(
     val name: String = "",
 )
 
-@Retention(AnnotationRetention.SOURCE)
+// Because of cc, following annotations retention to binary
+
+@Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Navigate
 
-@Retention(AnnotationRetention.SOURCE)
+@Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Back

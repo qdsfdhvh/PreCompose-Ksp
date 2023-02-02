@@ -15,6 +15,9 @@ kotlin {
                 implementation(projects.sample.feature.wallet)
             }
         }
+        val desktopMain by getting {
+            kotlin.srcDir("build/generated/ksp/desktop/desktopMain")
+        }
     }
 }
 
