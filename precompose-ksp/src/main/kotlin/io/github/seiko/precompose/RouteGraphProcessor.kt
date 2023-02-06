@@ -78,9 +78,6 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
         val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
             routeGraph.parameters
         )
-        require(functionNames.navigatorName.isNotEmpty()) {
-            "not find navigator in ${routeGraph.packageName}.$functionName"
-        }
 
         val fileBuilder = FileSpec.builder(packageName, functionName)
         scenes.forEach { scene ->

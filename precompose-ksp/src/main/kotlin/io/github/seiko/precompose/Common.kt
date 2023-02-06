@@ -66,14 +66,6 @@ private fun FunSpec.Builder.addNavigateParameters(
             withIndent {
                 parameters.forEach {
                     when {
-                        it.type.toTypeName() == navControllerType -> {
-                            addStatement(
-                                "%N = %N,",
-                                it.name?.asString() ?: "",
-                                functionNames.navigatorName
-                            )
-                        }
-
                         allowBackStackEntry && it.type.toTypeName() == navBackStackEntryType -> {
                             addStatement(
                                 "%N = it,",
@@ -81,37 +73,49 @@ private fun FunSpec.Builder.addNavigateParameters(
                             )
                         }
 
-                        it.isAnnotationPresent(Back::class) -> {
-                            if (functionNames.onBackName.isNotEmpty()) {
-                                addStatement(
-                                    "%N = %N,",
-                                    it.name?.asString() ?: "",
-                                    functionNames.onBackName,
-                                )
-                            } else {
-                                addStatement(
-                                    "%N = { %N.popBackStack() },",
-                                    it.name?.asString() ?: "",
-                                    functionNames.navigatorName
-                                )
-                            }
-                        }
+                        functionNames.navigatorName.isNotEmpty() -> {
+                            when {
+                                it.type.toTypeName() == navControllerType -> {
+                                    addStatement(
+                                        "%N = %N,",
+                                        it.name?.asString() ?: "",
+                                        functionNames.navigatorName
+                                    )
+                                }
 
-                        it.isAnnotationPresent(Navigate::class) -> {
-                            val type = it.type.resolve()
-                            require(type.isFunctionType)
-                            if (functionNames.onNavigateName.isNotEmpty()) {
-                                addStatement(
-                                    "%N = %N,",
-                                    it.name?.asString() ?: "",
-                                    functionNames.onNavigateName,
-                                )
-                            } else {
-                                addStatement(
-                                    "%N = { uri -> %N.navigate(uri) },",
-                                    it.name?.asString() ?: "",
-                                    functionNames.navigatorName,
-                                )
+                                it.isAnnotationPresent(Back::class) -> {
+                                    require(it.type.resolve().isFunctionType)
+                                    if (functionNames.onBackName.isNotEmpty()) {
+                                        addStatement(
+                                            "%N = %N,",
+                                            it.name?.asString() ?: "",
+                                            functionNames.onBackName,
+                                        )
+                                    } else {
+                                        addStatement(
+                                            "%N = { %N.popBackStack() },",
+                                            it.name?.asString() ?: "",
+                                            functionNames.navigatorName
+                                        )
+                                    }
+                                }
+
+                                it.isAnnotationPresent(Navigate::class) -> {
+                                    require(it.type.resolve().isFunctionType)
+                                    if (functionNames.onNavigateName.isNotEmpty()) {
+                                        addStatement(
+                                            "%N = %N,",
+                                            it.name?.asString() ?: "",
+                                            functionNames.onNavigateName,
+                                        )
+                                    } else {
+                                        addStatement(
+                                            "%N = { uri -> %N.navigate(uri) },",
+                                            it.name?.asString() ?: "",
+                                            functionNames.navigatorName,
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -130,7 +134,7 @@ private fun FunSpec.Builder.addNavigateParameters(
 }
 
 internal data class NavigatorFunctionNames(
-    var navigatorName: String = "",
     var onBackName: String = "",
     var onNavigateName: String = "",
+    var navigatorName: String = "",
 )

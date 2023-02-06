@@ -40,7 +40,6 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
                 val functionName = functionDeclaration.simpleName.asString()
 
                 val functionBuilder = FunSpec.builder(functionName)
-                    .receiver(routeBuilderType)
                     .apply {
                         functionDeclaration.extensionReceiver?.let {
                             receiver(it.toTypeName())
@@ -59,9 +58,6 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
                 val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
                     functionDeclaration.parameters
                 )
-                require(functionNames.navigatorName.isNotEmpty()) {
-                    "not find navigator in ${functionDeclaration.packageName}.$functionName"
-                }
 
                 val fileBuilder = FileSpec.builder(packageName, functionName)
 
