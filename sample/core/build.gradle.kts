@@ -1,6 +1,7 @@
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.jb)
 }
 
 kotlin {
@@ -11,7 +12,7 @@ kotlin {
             kotlin.srcDir("src/commonMain/route")
             dependencies {
                 api(projects.precomposeAnnotation)
-                api("moe.tlaster:precompose:1.3.8")
+                api(libs.precompose)
                 api(compose.material)
             }
         }

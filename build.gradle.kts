@@ -1,22 +1,17 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("com.android.application") version "7.3.1" apply false
-    id("com.android.library") version "7.3.1" apply false
-    kotlin("multiplatform") version "1.7.20" apply false
-    id("com.google.devtools.ksp") version "1.7.20-1.0.8" apply false
-    id("org.jetbrains.compose") version "1.2.0" apply false
-    id("com.vanniktech.maven.publish") version "0.22.0" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.compose.jb) apply false
+    alias(libs.plugins.publish) apply false
 }
 
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    }
-
     group = "io.github.qdsfdhvh"
     version = "1.0.4"
 
