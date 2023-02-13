@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.compose.jb) apply false
     alias(libs.plugins.publish) apply false
+    alias(libs.plugins.spotless)
 }
 
 allprojects {
@@ -45,5 +46,18 @@ allprojects {
                 }
             }
         }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/")
+        ktlint(libs.versions.ktlint.get())
+    }
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        targetExclude("**/build/")
+        ktlint(libs.versions.ktlint.get())
     }
 }
