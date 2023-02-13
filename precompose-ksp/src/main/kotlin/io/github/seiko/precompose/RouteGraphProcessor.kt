@@ -34,13 +34,13 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
         val scenes = resolver
             .getSymbolsWithAnnotation(
                 NavGraphDestination::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraphDestination")
+                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraphDestination"),
             ).filterIsInstance<KSFunctionDeclaration>()
 
         val routeGraphs = resolver
             .getSymbolsWithAnnotation(
                 RouteGraph::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraph")
+                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraph"),
             ).filterIsInstance<KSFunctionDeclaration>()
 
         val ret = routeGraphs.filter { !it.validate() }.toList()
@@ -71,12 +71,12 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
             functionBuilder.addModifiers(
                 routeGraph.modifiers
                     .filter { it.name != KModifier.EXPECT.name }
-                    .mapNotNull { it.toKModifier() }
+                    .mapNotNull { it.toKModifier() },
             )
         }
 
         val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
-            routeGraph.parameters
+            routeGraph.parameters,
         )
 
         val fileBuilder = FileSpec.builder(packageName, functionName)
@@ -123,7 +123,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                         addStatement("),")
                     }
                 }
-            }
+            },
         )
         functionBuilder.beginControlFlow(")")
         scene.parameters.forEach {
@@ -183,7 +183,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                     }
                                 }
                                 .build()
-                        }
+                        },
                     )
                     .addStatement(
                         "%L(",
@@ -200,10 +200,10 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                                     )
                                 }
                             }
-                        }
+                        },
                     )
                     .addStatement(")")
-                    .build()
+                    .build(),
             )
             .build()
             .writeTo(codeGenerator, Dependencies(true))

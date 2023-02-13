@@ -30,7 +30,7 @@ fun WalletCollectibleScene(
                     Text("Wallet")
                 },
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -64,7 +64,7 @@ fun WalletConnectScene(
                     Text("Wallet")
                 },
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

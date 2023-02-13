@@ -15,7 +15,7 @@ import io.github.seiko.precompose.annotation.Navigate
 
 @OptIn(KspExperimental::class)
 internal fun FunSpec.Builder.addParameterAndReturnNavigatorNames(
-    parameters: List<KSValueParameter>
+    parameters: List<KSValueParameter>,
 ): NavigatorFunctionNames {
     val functionNames = NavigatorFunctionNames()
     parameters.forEach { parameter ->
@@ -27,7 +27,7 @@ internal fun FunSpec.Builder.addParameterAndReturnNavigatorNames(
             parameter.isAnnotationPresent(Navigate::class) -> functionNames.onNavigateName = name
         }
         addParameter(
-            ParameterSpec.builder(name, type).build()
+            ParameterSpec.builder(name, type).build(),
         )
     }
     return functionNames
@@ -79,7 +79,7 @@ private fun FunSpec.Builder.addNavigateParameters(
                                     addStatement(
                                         "%N = %N,",
                                         it.name?.asString() ?: "",
-                                        functionNames.navigatorName
+                                        functionNames.navigatorName,
                                     )
                                 }
 
@@ -95,7 +95,7 @@ private fun FunSpec.Builder.addNavigateParameters(
                                         addStatement(
                                             "%N = { %N.popBackStack() },",
                                             it.name?.asString() ?: "",
-                                            functionNames.navigatorName
+                                            functionNames.navigatorName,
                                         )
                                     }
                                 }
@@ -129,7 +129,7 @@ private fun FunSpec.Builder.addNavigateParameters(
                     }
                 }
             }
-        }
+        },
     )
 }
 

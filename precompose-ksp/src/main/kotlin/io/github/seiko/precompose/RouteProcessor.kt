@@ -31,7 +31,7 @@ internal class RouteProcessor(
         val symbols = resolver
             .getSymbolsWithAnnotation(
                 Route::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for Route")
+                    ?: throw CloneNotSupportedException("Can not get qualifiedName for Route"),
             )
             .filterIsInstance<KSClassDeclaration>()
         val ret = symbols.filter { !it.validate() }.toList()
@@ -57,22 +57,22 @@ internal class RouteProcessor(
                 .takeIf {
                     it is NestedRouteDefinition
                 }?.let {
-                    PrefixRouteDefinition(
-                        schema = schema,
-                        child = it as NestedRouteDefinition,
-                        className = className,
-                    )
-                } ?: throw IllegalArgumentException("Expected NestedRouteDefinition, got ${node::class.qualifiedName}")
+                PrefixRouteDefinition(
+                    schema = schema,
+                    child = it as NestedRouteDefinition,
+                    className = className,
+                )
+            } ?: throw IllegalArgumentException("Expected NestedRouteDefinition, got ${node::class.qualifiedName}")
 
             val dependencies = Dependencies(
                 true,
-                *(data.mapNotNull { it.containingFile } + listOfNotNull(node.containingFile)).toTypedArray()
+                *(data.mapNotNull { it.containingFile } + listOfNotNull(node.containingFile)).toTypedArray(),
             )
             generateFile(
                 dependencies,
                 packageName,
                 className,
-                route.generateRoute()
+                route.generateRoute(),
             )
         }
 
@@ -80,7 +80,7 @@ internal class RouteProcessor(
             dependencies: Dependencies,
             packageName: String,
             className: String,
-            route: Taggable
+            route: Taggable,
         ) {
             FileSpec.builder(packageName, className)
                 .apply {
@@ -96,7 +96,7 @@ internal class RouteProcessor(
 
         private fun generateRoute(
             declaration: KSDeclaration,
-            parent: RouteDefinition? = null
+            parent: RouteDefinition? = null,
         ): RouteDefinition {
             val name = declaration.simpleName.getShortName()
             return when (declaration) {
@@ -109,7 +109,7 @@ internal class RouteProcessor(
                             definition.childRoute.addAll(
                                 declaration.declarations
                                     .filter { it.simpleName.getShortName() != "<init>" }
-                                    .map { generateRoute(it, definition) }
+                                    .map { generateRoute(it, definition) },
                             )
                         }
                     } else {
@@ -120,7 +120,7 @@ internal class RouteProcessor(
                             nestedRouteDefinition.childRoute.addAll(
                                 declaration.declarations
                                     .filter { it.simpleName.getShortName() != "<init>" }
-                                    .map { generateRoute(it, nestedRouteDefinition) }
+                                    .map { generateRoute(it, nestedRouteDefinition) },
                             )
                         }
                     }
@@ -139,7 +139,7 @@ internal class RouteProcessor(
                             RouteParameter(
                                 name = parameterName,
                                 type = parameterType,
-                                parameter = it
+                                parameter = it,
                             )
                         },
                     )

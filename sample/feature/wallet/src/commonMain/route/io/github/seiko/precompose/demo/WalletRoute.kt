@@ -1,8 +1,8 @@
 package io.github.seiko.precompose.demo
 
 import io.github.seiko.precompose.annotation.Back
-import io.github.seiko.precompose.annotation.RouteGraph
 import io.github.seiko.precompose.annotation.Navigate
+import io.github.seiko.precompose.annotation.RouteGraph
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.RouteBuilder
 

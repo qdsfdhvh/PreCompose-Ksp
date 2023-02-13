@@ -30,7 +30,7 @@ fun SocialProfileScene(
                     Text("Social")
                 },
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -62,7 +62,7 @@ fun SocialRelationScene(
                     Text("Social")
                 },
             )
-        }
+        },
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),

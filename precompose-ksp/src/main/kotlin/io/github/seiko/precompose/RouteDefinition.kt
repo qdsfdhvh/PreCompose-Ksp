@@ -77,15 +77,15 @@ internal data class ParameterRouteDefinition(
                                     if (pathParams.any()) RouteDivider else "",
                                     pathParams.joinToString(RouteDivider) { "{${it.name}}" },
                                     if (queryParams.any()) "?" else "",
-                                    queryParams.joinToString("&") { "${it.name}={${it.name}}" }
+                                    queryParams.joinToString("&") { "${it.name}={${it.name}}" },
                                 )
-                                .build()
+                                .build(),
                         )
                         addFunction(
                             funSpec(
                                 name,
-                                it.parameters
-                            )
+                                it.parameters,
+                            ),
                         )
                     } else {
                         it.generateRoute().addTo(this)
@@ -123,7 +123,7 @@ private fun Taggable.addTo(builder: TypeSpec.Builder) {
 internal data class ConstRouteDefinition(
     override val name: String,
     override val parent: RouteDefinition? = null,
-    private val isConst: Boolean
+    private val isConst: Boolean,
 ) : RouteDefinition {
     override fun generateRoute(): Taggable {
         return PropertySpec.builder(name, String::class)
@@ -148,7 +148,7 @@ internal data class FunctionRouteDefinition(
         return TypeSpec.objectBuilder(name)
             .addModifiers(KModifier.ACTUAL)
             .addFunction(
-                funSpec(name = name, parameters = parameters)
+                funSpec(name = name, parameters = parameters),
             )
             .addProperty(
                 PropertySpec.builder("path", String::class)
@@ -159,9 +159,9 @@ internal data class FunctionRouteDefinition(
                         RouteDivider,
                         name,
                         RouteDivider,
-                        p.joinToString(RouteDivider) { "{${it.name}}" }
+                        p.joinToString(RouteDivider) { "{${it.name}}" },
                     )
-                    .build()
+                    .build(),
             )
             .build()
     }
@@ -180,7 +180,7 @@ private fun RouteDefinition.funSpec(
             parameters.map {
                 ParameterSpec.builder(it.name, it.type)
                     .build()
-            }
+            },
         )
         .addStatement("val path = %S + %S + %S", parentPath, RouteDivider, name)
         .also {
@@ -202,7 +202,7 @@ private fun RouteDefinition.funSpec(
                         } else {
                             "${it.name}=\${if (${it.name} == null) \"\" else ${it.name}}"
                         }
-                    }
+                    },
                 )
             } else {
                 it.addStatement("val query = \"\"")

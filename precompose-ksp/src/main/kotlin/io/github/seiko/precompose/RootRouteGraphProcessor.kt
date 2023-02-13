@@ -25,13 +25,15 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
         val rootRouteGraphs = resolver
             .getSymbolsWithAnnotation(
                 RootRouteGraph::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RootRouteGraph")
+                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RootRouteGraph"),
             ).filterIsInstance<KSFunctionDeclaration>()
 
         val routeGraphs = if (rootRouteGraphs.any()) {
             resolver.getDeclarationsFromPackage(META_PACKAGE_NAME)
                 .filterIsInstance<KSFunctionDeclaration>()
-        } else emptySequence()
+        } else {
+            emptySequence()
+        }
 
         val ret = rootRouteGraphs.filter { !it.validate() }.toList()
         rootRouteGraphs.filter { it.validate() }
@@ -51,12 +53,12 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
                     functionBuilder.addModifiers(
                         functionDeclaration.modifiers
                             .filter { it.name != KModifier.EXPECT.name }
-                            .mapNotNull { it.toKModifier() }
+                            .mapNotNull { it.toKModifier() },
                     )
                 }
 
                 val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
-                    functionDeclaration.parameters
+                    functionDeclaration.parameters,
                 )
 
                 val fileBuilder = FileSpec.builder(packageName, functionName)
