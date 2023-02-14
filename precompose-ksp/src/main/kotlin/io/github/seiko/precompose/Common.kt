@@ -116,6 +116,14 @@ private fun FunSpec.Builder.addNavigateParameters(
                                         )
                                     }
                                 }
+
+                                else -> {
+                                    addStatement(
+                                        "%N = %N,",
+                                        it.name?.asString() ?: "",
+                                        it.name?.asString() ?: "",
+                                    )
+                                }
                             }
                         }
 
