@@ -9,7 +9,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -30,77 +29,86 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
 
     private val codeGenerator = environment.codeGenerator
 
+    companion object {
+        private val DESTINATION_ANNOTATION_NAME =
+            requireNotNull(NavGraphDestination::class.qualifiedName) { "Can not get qualifiedName for RouteGraphDestination" }
+        private val ROUTE_GRAPH_NAME =
+            requireNotNull(RouteGraph::class.qualifiedName) { "Can not get qualifiedName for RouteGraph" }
+    }
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val scenes = resolver
-            .getSymbolsWithAnnotation(
-                NavGraphDestination::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraphDestination"),
-            ).filterIsInstance<KSFunctionDeclaration>()
+        val sceneSymbols = resolver
+            .getSymbolsWithAnnotation(DESTINATION_ANNOTATION_NAME)
+            .filterIsInstance<KSFunctionDeclaration>()
 
-        val routeGraphs = resolver
-            .getSymbolsWithAnnotation(
-                RouteGraph::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraph"),
-            ).filterIsInstance<KSFunctionDeclaration>()
+        val routeGraphSymbols = resolver
+            .getSymbolsWithAnnotation(ROUTE_GRAPH_NAME)
+            .filterIsInstance<KSFunctionDeclaration>()
 
-        val ret = routeGraphs.filter { !it.validate() }.toList()
-        routeGraphs.filter { it.validate() }
-            .forEach { routeGraph ->
-                generateRouteGraph(routeGraph, scenes.toList())
-                generateRouteGraphMetaData(routeGraph)
+        routeGraphSymbols
+            .forEach { routeGraphSymbol ->
+                generateRouteGraph(routeGraphSymbol, sceneSymbols.toList())
+                    .writeTo(
+                        codeGenerator,
+                        Dependencies(true),
+                    )
+                generateRouteGraphMetaData(routeGraphSymbol)
+                    .writeTo(
+                        codeGenerator,
+                        Dependencies(true),
+                    )
             }
-        return ret
+        return emptyList()
     }
 
     private fun generateRouteGraph(
-        routeGraph: KSFunctionDeclaration,
-        scenes: List<KSFunctionDeclaration>,
-    ) {
-        val packageName = routeGraph.packageName.asString()
-        val functionName = routeGraph.simpleName.asString()
+        routeGraphSymbol: KSFunctionDeclaration,
+        sceneSymbols: List<KSFunctionDeclaration>,
+    ): FileSpec {
+        val packageName = routeGraphSymbol.packageName.asString()
+        val functionName = routeGraphSymbol.simpleName.asString()
 
         val functionBuilder = FunSpec.builder(functionName)
             .apply {
-                routeGraph.extensionReceiver?.let {
+                routeGraphSymbol.extensionReceiver?.let {
                     receiver(it.toTypeName())
                 }
             }
 
-        if (routeGraph.modifiers.isNotEmpty()) {
+        if (routeGraphSymbol.modifiers.isNotEmpty()) {
             functionBuilder.addModifiers(KModifier.ACTUAL)
             functionBuilder.addModifiers(
-                routeGraph.modifiers
+                routeGraphSymbol.modifiers
                     .filter { it.name != KModifier.EXPECT.name }
                     .mapNotNull { it.toKModifier() },
             )
         }
 
         val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
-            routeGraph.parameters,
+            routeGraphSymbol.parameters,
         )
 
         val fileBuilder = FileSpec.builder(packageName, functionName)
-        scenes.forEach { scene ->
+        sceneSymbols.forEach { sceneSymbol ->
             generateScene(
                 fileBuilder = fileBuilder,
                 functionBuilder = functionBuilder,
                 functionNames = functionNames,
-                scene = scene,
+                sceneSymbol = sceneSymbol,
             )
         }
 
-        fileBuilder.addFunction(functionBuilder.build())
+        return fileBuilder.addFunction(functionBuilder.build())
             .build()
-            .writeTo(codeGenerator, Dependencies(true))
     }
 
     private fun generateScene(
         fileBuilder: FileSpec.Builder,
         functionBuilder: FunSpec.Builder,
         functionNames: NavigatorFunctionNames,
-        scene: KSFunctionDeclaration,
+        sceneSymbol: KSFunctionDeclaration,
     ) {
-        val annotation = scene.getAnnotationsByType(NavGraphDestination::class).first()
+        val annotation = sceneSymbol.getAnnotationsByType(NavGraphDestination::class).first()
         if (annotation.packageName.isNotEmpty()) {
             fileBuilder.addImport(annotation.packageName, annotation.functionName)
         }
@@ -126,7 +134,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
             },
         )
         functionBuilder.beginControlFlow(")")
-        scene.parameters.forEach {
+        sceneSymbol.parameters.forEach {
             if (it.isAnnotationPresent(Path::class)) {
                 require(!it.type.resolve().isMarkedNullable)
             }
@@ -153,29 +161,30 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                 )
             }
         }
+
         functionBuilder.addNavigateParameters(
             fileBuilder = fileBuilder,
             functionNames = functionNames,
-            functionDeclaration = scene,
+            functionDeclaration = sceneSymbol,
         )
         functionBuilder.endControlFlow()
     }
 
     private fun generateRouteGraphMetaData(
-        functionDeclaration: KSFunctionDeclaration,
-    ) {
-        val functionName = functionDeclaration.simpleName.asString()
+        routeGraphSymbol: KSFunctionDeclaration,
+    ): FileSpec {
+        val functionName = routeGraphSymbol.simpleName.asString()
 
-        FileSpec.builder(META_PACKAGE_NAME, "meta$$functionName")
+        return FileSpec.builder(META_PACKAGE_NAME, "meta$$functionName")
             .addImport(
-                functionDeclaration.packageName.asString(),
+                routeGraphSymbol.packageName.asString(),
                 functionName,
             )
             .addFunction(
                 FunSpec.builder(functionName)
-                    .receiver(functionDeclaration.extensionReceiver!!.toTypeName())
+                    .receiver(routeGraphSymbol.extensionReceiver!!.toTypeName())
                     .addParameters(
-                        functionDeclaration.parameters.map {
+                        routeGraphSymbol.parameters.map {
                             ParameterSpec.builder(it.name!!.asString(), it.type.toTypeName())
                                 .apply {
                                     it.annotations.forEach { annotation ->
@@ -192,7 +201,7 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                     .addCode(
                         buildCodeBlock {
                             withIndent {
-                                functionDeclaration.parameters.forEach {
+                                routeGraphSymbol.parameters.forEach {
                                     addStatement(
                                         "%L = %L,",
                                         it.name!!.asString(),
@@ -206,6 +215,5 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
                     .build(),
             )
             .build()
-            .writeTo(codeGenerator, Dependencies(true))
     }
 }

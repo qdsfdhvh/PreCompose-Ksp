@@ -13,7 +13,6 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.Modifier
-import com.google.devtools.ksp.validate
 import com.google.devtools.ksp.visitor.KSEmptyVisitor
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -27,18 +26,19 @@ import io.github.seiko.precompose.annotation.Route
 internal class RouteProcessor(
     private val codeGenerator: CodeGenerator,
 ) : SymbolProcessor {
+
+    companion object {
+        private val ROUTE_ANNOTATION_NAME =
+            requireNotNull(Route::class.qualifiedName) { "Can not get qualifiedName for Route" }
+    }
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver
-            .getSymbolsWithAnnotation(
-                Route::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for Route"),
-            )
+            .getSymbolsWithAnnotation(ROUTE_ANNOTATION_NAME)
             .filterIsInstance<KSClassDeclaration>()
-        val ret = symbols.filter { !it.validate() }.toList()
         symbols
-            .filter { it.validate() }
             .forEach { it.accept(RouteVisitor(), symbols.toList()) }
-        return ret
+        return emptyList()
     }
 
     inner class RouteVisitor : KSEmptyVisitor<List<KSClassDeclaration>, Unit>() {
@@ -62,7 +62,8 @@ internal class RouteProcessor(
                     child = it as NestedRouteDefinition,
                     className = className,
                 )
-            } ?: throw IllegalArgumentException("Expected NestedRouteDefinition, got ${node::class.qualifiedName}")
+            }
+                ?: throw IllegalArgumentException("Expected NestedRouteDefinition, got ${node::class.qualifiedName}")
 
             val dependencies = Dependencies(
                 true,

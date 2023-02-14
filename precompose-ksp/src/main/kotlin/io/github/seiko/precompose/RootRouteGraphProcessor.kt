@@ -7,7 +7,6 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -21,49 +20,52 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
 
     private val codeGenerator = environment.codeGenerator
 
-    override fun process(resolver: Resolver): List<KSAnnotated> {
-        val rootRouteGraphs = resolver
-            .getSymbolsWithAnnotation(
-                RootRouteGraph::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RootRouteGraph"),
-            ).filterIsInstance<KSFunctionDeclaration>()
+    companion object {
+        private val ROOT_ROUTE_GRAPH_NAME =
+            requireNotNull(RootRouteGraph::class.qualifiedName) { "Can not get qualifiedName for RootRouteGraph" }
+    }
 
-        val routeGraphs = if (rootRouteGraphs.any()) {
-            resolver.getDeclarationsFromPackage(META_PACKAGE_NAME)
+    override fun process(resolver: Resolver): List<KSAnnotated> {
+        val rootRouteGraphSymbols = resolver
+            .getSymbolsWithAnnotation(ROOT_ROUTE_GRAPH_NAME)
+            .filterIsInstance<KSFunctionDeclaration>()
+
+        val metaRouteGraphSymbols = if (rootRouteGraphSymbols.any()) {
+            resolver
+                .getDeclarationsFromPackage(META_PACKAGE_NAME)
                 .filterIsInstance<KSFunctionDeclaration>()
         } else {
             emptySequence()
         }
 
-        val ret = rootRouteGraphs.filter { !it.validate() }.toList()
-        rootRouteGraphs.filter { it.validate() }
-            .forEach { functionDeclaration ->
-                val packageName = functionDeclaration.packageName.asString()
-                val functionName = functionDeclaration.simpleName.asString()
+        rootRouteGraphSymbols
+            .forEach { rootRouteGraphSymbol ->
+                val packageName = rootRouteGraphSymbol.packageName.asString()
+                val functionName = rootRouteGraphSymbol.simpleName.asString()
 
                 val functionBuilder = FunSpec.builder(functionName)
                     .apply {
-                        functionDeclaration.extensionReceiver?.let {
+                        rootRouteGraphSymbol.extensionReceiver?.let {
                             receiver(it.toTypeName())
                         }
                     }
 
-                if (functionDeclaration.modifiers.isNotEmpty()) {
+                if (rootRouteGraphSymbol.modifiers.isNotEmpty()) {
                     functionBuilder.addModifiers(KModifier.ACTUAL)
                     functionBuilder.addModifiers(
-                        functionDeclaration.modifiers
+                        rootRouteGraphSymbol.modifiers
                             .filter { it.name != KModifier.EXPECT.name }
                             .mapNotNull { it.toKModifier() },
                     )
                 }
 
                 val functionNames = functionBuilder.addParameterAndReturnNavigatorNames(
-                    functionDeclaration.parameters,
+                    rootRouteGraphSymbol.parameters,
                 )
 
                 val fileBuilder = FileSpec.builder(packageName, functionName)
 
-                routeGraphs.forEach { routeGraph ->
+                metaRouteGraphSymbols.forEach { routeGraph ->
                     functionBuilder.addNavigateParameters(
                         fileBuilder = fileBuilder,
                         functionNames = functionNames,
@@ -76,6 +78,6 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
                     .build()
                     .writeTo(codeGenerator, Dependencies(true))
             }
-        return ret
+        return emptyList()
     }
 }
