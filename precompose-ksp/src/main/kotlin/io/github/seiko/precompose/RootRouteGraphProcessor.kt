@@ -25,7 +25,14 @@ class RootRouteGraphProcessor(environment: SymbolProcessorEnvironment) : SymbolP
             requireNotNull(RootRouteGraph::class.qualifiedName) { "Can not get qualifiedName for RootRouteGraph" }
     }
 
+    private var invoked = false
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (invoked) {
+            return emptyList()
+        }
+        invoked = true
+
         val rootRouteGraphSymbols = resolver
             .getSymbolsWithAnnotation(ROOT_ROUTE_GRAPH_NAME)
             .filterIsInstance<KSFunctionDeclaration>()

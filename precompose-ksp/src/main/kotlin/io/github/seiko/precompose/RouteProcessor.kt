@@ -32,7 +32,14 @@ internal class RouteProcessor(
             requireNotNull(Route::class.qualifiedName) { "Can not get qualifiedName for Route" }
     }
 
+    private var invoked = false
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (invoked) {
+            return emptyList()
+        }
+        invoked = true
+
         val symbols = resolver
             .getSymbolsWithAnnotation(ROUTE_ANNOTATION_NAME)
             .filterIsInstance<KSClassDeclaration>()

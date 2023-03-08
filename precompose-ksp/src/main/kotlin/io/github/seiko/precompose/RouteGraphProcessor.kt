@@ -36,7 +36,14 @@ internal class RouteGraphProcessor(environment: SymbolProcessorEnvironment) : Sy
             requireNotNull(RouteGraph::class.qualifiedName) { "Can not get qualifiedName for RouteGraph" }
     }
 
+    private var invoked = false
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (invoked) {
+            return emptyList()
+        }
+        invoked = true
+
         val sceneSymbols = resolver
             .getSymbolsWithAnnotation(DESTINATION_ANNOTATION_NAME)
             .filterIsInstance<KSFunctionDeclaration>()
