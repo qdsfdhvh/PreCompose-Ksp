@@ -31,18 +31,17 @@ sealed interface FunctionParameterType {
 internal fun FunctionParameter.Companion.of(
     ksValueParameter: KSValueParameter,
 ): FunctionParameter {
+    val name = requireNotNull(ksValueParameter.name).asString()
     val type = when {
         ksValueParameter.isAnnotationPresent(Path::class) -> {
             require(!ksValueParameter.isNullable)
-            FunctionParameterType.Path(
-                ksValueParameter.getAnnotationsByType(Path::class).first().name,
-            )
+            val pathName = ksValueParameter.getAnnotationsByType(Path::class).first().name
+            FunctionParameterType.Path(pathName.ifEmpty { name })
         }
         ksValueParameter.isAnnotationPresent(Query::class) -> {
             require(ksValueParameter.isNullable)
-            FunctionParameterType.Query(
-                ksValueParameter.getAnnotationsByType(Query::class).first().name,
-            )
+            val queryName = ksValueParameter.getAnnotationsByType(Query::class).first().name
+            FunctionParameterType.Query(queryName.ifEmpty { name })
         }
         ksValueParameter.isAnnotationPresent(Back::class) -> {
             require(ksValueParameter.isFunctionType)
@@ -57,7 +56,7 @@ internal fun FunctionParameter.Companion.of(
         }
     }
     return FunctionParameter(
-        name = requireNotNull(ksValueParameter.name).asString(),
+        name = name,
         typeName = ksValueParameter.type.toTypeName(),
         type = type,
     )

@@ -9,33 +9,30 @@ import io.github.seiko.precompose.code.pathType
 import io.github.seiko.precompose.code.queryType
 import io.github.seiko.precompose.symbol.FunctionParameterType
 import io.github.seiko.precompose.symbol.SceneDeclaration
-import io.github.seiko.precompose.symbol.RouteGraphDeclaration
 
-internal class RouteGraphFileSpecFactory {
+internal class SceneFileSpecFactory {
 
-    fun create(routeGraph: RouteGraphDeclaration): FileSpec {
+    fun create(scene: SceneDeclaration): FileSpec {
         return FileSpec.builder(
             Names.routeGraphPackageName,
-            routeGraph.name,
+            scene.fileName,
         ).apply {
-            routeGraph.scenes.forEach { scene ->
-                if (scene.packageName.isNotEmpty()) {
-                    addImport(scene.packageName, scene.name)
-                }
-                if (scene.scenePackageName.isNotEmpty()) {
-                    addImport(scene.scenePackageName, scene.sceneName)
-                }
+            if (scene.packageName.isNotEmpty()) {
+                addImport(scene.packageName, scene.name)
             }
-            addFunction(createRouteGraphFunction(routeGraph))
+            if (scene.scenePackageName.isNotEmpty()) {
+                addImport(scene.scenePackageName, scene.sceneName)
+            }
+            addFunction(createSceneFunction(scene))
         }.build()
     }
 
-    private fun createRouteGraphFunction(routeGraph: RouteGraphDeclaration): FunSpec {
+    private fun createSceneFunction(scene: SceneDeclaration): FunSpec {
         return FunSpec.builder(
-            routeGraph.name,
+            scene.fileName,
         ).apply {
-            receiver(routeGraph.receiver)
-            routeGraph.parameters.forEach {
+            receiver(scene.receiver)
+            scene.parameters.forEach {
                 when (it.type) {
                     is FunctionParameterType.Path -> Unit
                     is FunctionParameterType.Query -> Unit
@@ -46,13 +43,11 @@ internal class RouteGraphFileSpecFactory {
                     }
                 }
             }
-            routeGraph.scenes.forEach { scene ->
-                addNavGraphDestinationFunction(scene)
-            }
+            addSceneFunction(scene)
         }.build()
     }
 
-    private fun FunSpec.Builder.addNavGraphDestinationFunction(scene: SceneDeclaration) {
+    private fun FunSpec.Builder.addSceneFunction(scene: SceneDeclaration) {
         addStatement("%L(", scene.sceneName)
         addCode(
             buildCodeBlock {

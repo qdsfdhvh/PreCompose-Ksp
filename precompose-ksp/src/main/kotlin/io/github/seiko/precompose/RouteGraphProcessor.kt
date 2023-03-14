@@ -3,10 +3,10 @@ package io.github.seiko.precompose
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
-import io.github.seiko.precompose.destination.RouteGraphGenerator
+import io.github.seiko.precompose.destination.SceneGenerator
 
 internal class RouteGraphProcessor(
-    private val routeGraphGenerator: RouteGraphGenerator,
+    private val sceneGenerator: SceneGenerator,
 ) : SymbolProcessor {
 
     private enum class Step {
@@ -19,7 +19,7 @@ internal class RouteGraphProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         when (step) {
             Step.CollectScene -> {
-                routeGraphGenerator.generate(resolver)
+                sceneGenerator.generate(resolver)
             }
             Step.Completed -> {
                 // no op
