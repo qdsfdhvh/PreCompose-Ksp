@@ -9,7 +9,7 @@ annotation class NavGraphContainer
 annotation class NavGraphDestination(
     val route: String,
     // [] not support for js
-    val deepLink: Array<String> = emptyArray(),
+    val deepLinks: Array<String> = emptyArray(),
     val packageName: String = "",
     val functionName: String = "scene",
 )
