@@ -30,9 +30,8 @@ class RouteGraphFactory internal constructor(
 
     private fun createNavGraphDestinationGenerator(): NavGraphDestinationGenerator {
         return NavGraphDestinationGenerator(
-            logger = environment.logger,
             fileGenerator = fileGenerator,
-            sceneFileSpecFactory = NavGraphDestinationFileSpecFactory(
+            navGraphDestinationFileSpecFactory = NavGraphDestinationFileSpecFactory(
                 packageName = options.routeGraphPackageName,
             ),
         )
@@ -40,15 +39,15 @@ class RouteGraphFactory internal constructor(
 
     private fun createNavGraphContainerGenerator(): NavGraphContainerGenerator {
         return NavGraphContainerGenerator(
-            logger = environment.logger,
             packageName = options.routeGraphPackageName,
             fileGenerator = fileGenerator,
-            rootRouteGraphFileSpecFactory = NavGraphContainerFileSpecFactory(),
+            navGraphContainerFileSpecFactory = NavGraphContainerFileSpecFactory(),
         )
     }
 
     internal fun createProcessor(): RouteGraphProcessor {
         return RouteGraphProcessor(
+            isGenerateContainer = options.isGenerateContainer,
             navGraphDestinationGenerator = createNavGraphDestinationGenerator(),
             navGraphContainerGenerator = createNavGraphContainerGenerator(),
             timeMeasure = timeMeasure,

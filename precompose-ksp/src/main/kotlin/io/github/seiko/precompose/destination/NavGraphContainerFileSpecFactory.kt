@@ -10,26 +10,26 @@ import io.github.seiko.precompose.symbol.NavGraphDestinationLinkDeclaration
 
 internal class NavGraphContainerFileSpecFactory {
 
-    fun create(rootRouteGraph: NavGraphContainerDeclaration): FileSpec {
+    fun create(container: NavGraphContainerDeclaration): FileSpec {
         return FileSpec.builder(
-            rootRouteGraph.packageName,
-            rootRouteGraph.name,
+            container.packageName,
+            container.name,
         ).apply {
-            rootRouteGraph.links.forEach { routeGraph ->
+            container.links.forEach { routeGraph ->
                 if (routeGraph.packageName.isNotEmpty()) {
                     addImport(routeGraph.packageName, routeGraph.name)
                 }
             }
-            addFunction(createFunction(rootRouteGraph))
+            addFunction(createFunction(container))
         }.build()
     }
 
-    private fun createFunction(rootRouteGraph: NavGraphContainerDeclaration): FunSpec {
-        return FunSpec.builder(rootRouteGraph.name)
+    private fun createFunction(container: NavGraphContainerDeclaration): FunSpec {
+        return FunSpec.builder(container.name)
             .apply {
-                receiver(rootRouteGraph.receiverType)
-                addModifiers(rootRouteGraph.modifiers)
-                rootRouteGraph.parameters.forEach {
+                receiver(container.receiverType)
+                addModifiers(container.modifiers)
+                container.parameters.forEach {
                     when (it.type) {
                         is FunctionParameterType.Path -> Unit
                         is FunctionParameterType.Query -> Unit
@@ -41,7 +41,7 @@ internal class NavGraphContainerFileSpecFactory {
                         }
                     }
                 }
-                rootRouteGraph.links.forEach { routeGraph ->
+                container.links.forEach { routeGraph ->
                     addRouteGraphFunction(routeGraph)
                 }
             }.build()

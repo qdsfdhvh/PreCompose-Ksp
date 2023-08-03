@@ -14,27 +14,27 @@ internal class NavGraphDestinationFileSpecFactory(
     private val packageName: String?,
 ) {
 
-    fun create(scene: NavGraphDestinationDeclaration): FileSpec {
+    fun create(destination: NavGraphDestinationDeclaration): FileSpec {
         return FileSpec.builder(
             packageName ?: Names.routeGraphPackageName,
-            scene.fileName,
+            destination.fileName,
         ).apply {
-            if (scene.packageName.isNotEmpty()) {
-                addImport(scene.packageName, scene.name)
+            if (destination.packageName.isNotEmpty()) {
+                addImport(destination.packageName, destination.name)
             }
-            if (scene.scenePackageName.isNotEmpty()) {
-                addImport(scene.scenePackageName, scene.sceneName)
+            if (destination.scenePackageName.isNotEmpty()) {
+                addImport(destination.scenePackageName, destination.sceneName)
             }
-            addFunction(createSceneFunction(scene))
+            addFunction(createSceneFunction(destination))
         }.build()
     }
 
-    private fun createSceneFunction(scene: NavGraphDestinationDeclaration): FunSpec {
+    private fun createSceneFunction(destination: NavGraphDestinationDeclaration): FunSpec {
         return FunSpec.builder(
-            scene.fileName,
+            destination.fileName,
         ).apply {
-            receiver(scene.receiver)
-            scene.parameters.forEach {
+            receiver(destination.receiver)
+            destination.parameters.forEach {
                 when (it.type) {
                     is FunctionParameterType.Path -> Unit
                     is FunctionParameterType.Query -> Unit
@@ -46,20 +46,20 @@ internal class NavGraphDestinationFileSpecFactory(
                     }
                 }
             }
-            addSceneFunction(scene)
+            addSceneFunction(destination)
         }.build()
     }
 
-    private fun FunSpec.Builder.addSceneFunction(scene: NavGraphDestinationDeclaration) {
-        addStatement("%L(", scene.sceneName)
+    private fun FunSpec.Builder.addSceneFunction(destination: NavGraphDestinationDeclaration) {
+        addStatement("%L(", destination.sceneName)
         addCode(
             buildCodeBlock {
                 withIndent {
-                    addStatement("route = %S,", scene.route)
-                    if (scene.deepLinks.isNotEmpty()) {
+                    addStatement("route = %S,", destination.route)
+                    if (destination.deepLinks.isNotEmpty()) {
                         addStatement("deepLinks = listOf(")
                         withIndent {
-                            scene.deepLinks.forEach {
+                            destination.deepLinks.forEach {
                                 addStatement("%S,", it)
                             }
                         }
@@ -69,11 +69,11 @@ internal class NavGraphDestinationFileSpecFactory(
             },
         )
         beginControlFlow(")")
-        addStatement("%L(", scene.name)
+        addStatement("%L(", destination.name)
         addCode(
             buildCodeBlock {
                 withIndent {
-                    scene.parameters.forEach {
+                    destination.parameters.forEach {
                         when (it.type) {
                             is FunctionParameterType.Path -> {
                                 addStatement(

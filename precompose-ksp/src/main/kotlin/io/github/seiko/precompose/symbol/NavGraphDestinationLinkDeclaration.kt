@@ -1,5 +1,6 @@
 package io.github.seiko.precompose.symbol
 
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -10,6 +11,7 @@ internal data class NavGraphDestinationLinkDeclaration(
     val name: String,
     val receiver: TypeName,
     val parameters: List<FunctionParameter>,
+    val containingFile: KSFile?,
 ) {
     companion object
 }
@@ -22,5 +24,6 @@ internal fun NavGraphDestinationLinkDeclaration.Companion.of(
         name = ksFunction.simpleName.asString(),
         receiver = ksFunction.extensionReceiver?.toTypeName() ?: routeBuilderType,
         parameters = ksFunction.parameters.map { FunctionParameter.of(it) },
+        containingFile = ksFunction.containingFile,
     )
 }

@@ -23,12 +23,11 @@ kotlin {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", projects.precomposeKsp)
     add("kspDesktop", projects.precomposeKsp)
     add("kspIosX64", projects.precomposeKsp)
     add("kspIosArm64", projects.precomposeKsp)
 }
 
 ksp {
-    arg("measureDuration", "true")
+    arg("measureDuration", "false")
 }

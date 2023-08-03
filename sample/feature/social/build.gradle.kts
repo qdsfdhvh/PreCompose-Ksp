@@ -29,5 +29,6 @@ dependencies {
 }
 
 ksp {
-    arg("measureDuration", "true")
+    arg("measureDuration", "false")
+    arg("isGenerateContainer", "false")
 }

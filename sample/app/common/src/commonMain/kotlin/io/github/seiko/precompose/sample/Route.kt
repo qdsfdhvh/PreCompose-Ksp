@@ -36,7 +36,3 @@ expect fun RouteBuilder.generateRoute(
     @Navigate onNavigate: (String) -> Unit,
     onWebNavigate: (String) -> Unit,
 )
-
-@NavGraphContainer
-fun aaa() {
-}
