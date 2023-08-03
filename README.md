@@ -21,14 +21,14 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-+                api("io.github.qdsfdhvh:precompose-annotation:1.0.7")
++                api("io.github.qdsfdhvh:precompose-annotation:1.0.8")
             }
         }
     }
 }
 
 dependencies {
-+    kspAll("io.github.qdsfdhvh:precompose-ksp:1.0.7")
++    kspAll("io.github.qdsfdhvh:precompose-ksp:1.0.8")
 }
 
 fun DependencyHandlerScope.kspAll(dependencyNotation: Any) {
