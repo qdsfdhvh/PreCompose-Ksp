@@ -30,7 +30,7 @@ internal fun NavGraphDestinationDeclaration.Companion.of(
     val annotation = ksFunction.getAnnotationsByType(NavGraphDestination::class).first()
     return NavGraphDestinationDeclaration(
         route = annotation.route,
-        deepLinks = annotation.deepLinks.split(','),
+        deepLinks = annotation.deepLinks.split(',').filterNot { it.isEmpty() },
         fileName = "${ksFunction.packageName.asString()}.${ksFunction.simpleName.asString()}"
             .replace(".", "_")
             .replace("`", ""),
