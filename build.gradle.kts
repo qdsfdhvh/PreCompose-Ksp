@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -8,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.compose.jb) apply false
-    alias(libs.plugins.publish) apply false
+    alias(libs.plugins.publish)
     alias(libs.plugins.spotless)
 }
 
@@ -17,10 +16,10 @@ allprojects {
     version = "1.0.6"
 
     plugins.withId("com.vanniktech.maven.publish.base") {
-        @Suppress("UnstableApiUsage")
-        configure<MavenPublishBaseExtension> {
+        mavenPublishing {
             publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
             signAllPublications()
+            @Suppress("UnstableApiUsage")
             pom {
                 description.set("A route compiler for PreCompose (KSP).")
                 name.set(project.name)
