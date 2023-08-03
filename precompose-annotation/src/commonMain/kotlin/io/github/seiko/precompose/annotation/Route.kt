@@ -1,15 +1,8 @@
 package io.github.seiko.precompose.annotation
 
 @Retention(AnnotationRetention.SOURCE)
-@Target(AnnotationTarget.CLASS)
-annotation class Route(
-    val schema: String = "",
-    val packageName: String = "",
-)
-
-@Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FUNCTION)
-annotation class RootRouteGraph
+annotation class NavGraphContainer
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FUNCTION)
@@ -19,7 +12,6 @@ annotation class NavGraphDestination(
     val deepLink: Array<String> = emptyArray(),
     val packageName: String = "",
     val functionName: String = "scene",
-    // val generatedFunctionName: String = "generatedRoute",
 )
 
 @Retention(AnnotationRetention.BINARY)

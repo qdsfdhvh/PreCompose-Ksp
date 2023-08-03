@@ -8,13 +8,15 @@ import io.github.seiko.precompose.code.Names
 import io.github.seiko.precompose.code.pathType
 import io.github.seiko.precompose.code.queryType
 import io.github.seiko.precompose.symbol.FunctionParameterType
-import io.github.seiko.precompose.symbol.SceneDeclaration
+import io.github.seiko.precompose.symbol.NavGraphDestinationDeclaration
 
-internal class SceneFileSpecFactory {
+internal class NavGraphDestinationFileSpecFactory(
+    private val packageName: String?,
+) {
 
-    fun create(scene: SceneDeclaration): FileSpec {
+    fun create(scene: NavGraphDestinationDeclaration): FileSpec {
         return FileSpec.builder(
-            Names.routeGraphPackageName,
+            packageName ?: Names.routeGraphPackageName,
             scene.fileName,
         ).apply {
             if (scene.packageName.isNotEmpty()) {
@@ -27,7 +29,7 @@ internal class SceneFileSpecFactory {
         }.build()
     }
 
-    private fun createSceneFunction(scene: SceneDeclaration): FunSpec {
+    private fun createSceneFunction(scene: NavGraphDestinationDeclaration): FunSpec {
         return FunSpec.builder(
             scene.fileName,
         ).apply {
@@ -38,7 +40,8 @@ internal class SceneFileSpecFactory {
                     is FunctionParameterType.Query -> Unit
                     FunctionParameterType.Navigate,
                     FunctionParameterType.Back,
-                    FunctionParameterType.Custom -> {
+                    FunctionParameterType.Custom,
+                    -> {
                         addParameter(it.name, it.typeName)
                     }
                 }
@@ -47,7 +50,7 @@ internal class SceneFileSpecFactory {
         }.build()
     }
 
-    private fun FunSpec.Builder.addSceneFunction(scene: SceneDeclaration) {
+    private fun FunSpec.Builder.addSceneFunction(scene: NavGraphDestinationDeclaration) {
         addStatement("%L(", scene.sceneName)
         addCode(
             buildCodeBlock {
@@ -63,7 +66,7 @@ internal class SceneFileSpecFactory {
                         addStatement("),")
                     }
                 }
-            }
+            },
         )
         beginControlFlow(")")
         addStatement("%L(", scene.name)
@@ -90,7 +93,8 @@ internal class SceneFileSpecFactory {
                             }
                             FunctionParameterType.Navigate,
                             FunctionParameterType.Back,
-                            FunctionParameterType.Custom -> {
+                            FunctionParameterType.Custom,
+                            -> {
                                 addStatement(
                                     "%N = %N,",
                                     it.name,
@@ -100,10 +104,9 @@ internal class SceneFileSpecFactory {
                         }
                     }
                 }
-            }
+            },
         )
         addStatement(")")
         endControlFlow()
     }
-
 }

@@ -3,8 +3,8 @@ package io.github.seiko.precompose.sample
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.seiko.precompose.annotation.Back
+import io.github.seiko.precompose.annotation.NavGraphContainer
 import io.github.seiko.precompose.annotation.Navigate
-import io.github.seiko.precompose.annotation.RootRouteGraph
 import io.github.seiko.precompose.demo.SocialRoute
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
@@ -29,10 +29,14 @@ fun Route(modifier: Modifier = Modifier) {
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-@RootRouteGraph
+@NavGraphContainer
 expect fun RouteBuilder.generateRoute(
     navigator: Navigator,
     @Back onBack: () -> Unit,
     @Navigate onNavigate: (String) -> Unit,
     onWebNavigate: (String) -> Unit,
 )
+
+@NavGraphContainer
+fun aaa() {
+}

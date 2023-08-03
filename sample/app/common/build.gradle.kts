@@ -28,3 +28,7 @@ dependencies {
     add("kspIosX64", projects.precomposeKsp)
     add("kspIosArm64", projects.precomposeKsp)
 }
+
+ksp {
+    arg("measureDuration", "true")
+}

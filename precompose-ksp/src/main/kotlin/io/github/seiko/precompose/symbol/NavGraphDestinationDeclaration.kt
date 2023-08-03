@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.TypeName
 import io.github.seiko.precompose.annotation.NavGraphDestination
 import io.github.seiko.precompose.code.routeBuilderType
 
-internal data class SceneDeclaration(
+internal data class NavGraphDestinationDeclaration(
     val route: String,
     val deepLinks: List<String>,
     val fileName: String,
@@ -24,11 +24,11 @@ internal data class SceneDeclaration(
 }
 
 @OptIn(KspExperimental::class)
-internal fun SceneDeclaration.Companion.of(
+internal fun NavGraphDestinationDeclaration.Companion.of(
     ksFunction: KSFunctionDeclaration,
-): SceneDeclaration {
+): NavGraphDestinationDeclaration {
     val annotation = ksFunction.getAnnotationsByType(NavGraphDestination::class).first()
-    return SceneDeclaration(
+    return NavGraphDestinationDeclaration(
         route = annotation.route,
         deepLinks = annotation.deepLink.toList(),
         fileName = "${ksFunction.packageName.asString()}.${ksFunction.simpleName.asString()}"

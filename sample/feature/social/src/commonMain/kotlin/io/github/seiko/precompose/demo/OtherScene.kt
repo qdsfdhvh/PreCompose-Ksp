@@ -8,13 +8,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.seiko.precompose.annotation.NavGraphContainer
 import io.github.seiko.precompose.annotation.NavGraphDestination
 import io.github.seiko.precompose.annotation.Path
 import io.github.seiko.precompose.annotation.Query
 import moe.tlaster.precompose.navigation.Navigator
 
 @NavGraphDestination(
-    route = "/other/one",
+    route = SocialRoute.OtherOne,
 )
 @Composable
 fun OtherOneScene(

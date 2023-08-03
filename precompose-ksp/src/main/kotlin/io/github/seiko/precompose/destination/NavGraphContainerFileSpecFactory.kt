@@ -5,17 +5,17 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.buildCodeBlock
 import com.squareup.kotlinpoet.withIndent
 import io.github.seiko.precompose.symbol.FunctionParameterType
-import io.github.seiko.precompose.symbol.RootRouteGraphDeclaration
-import io.github.seiko.precompose.symbol.RouteGraphDeclaration
+import io.github.seiko.precompose.symbol.NavGraphContainerDeclaration
+import io.github.seiko.precompose.symbol.NavGraphDestinationLinkDeclaration
 
-internal class RootRouteGraphFileSpecFactory {
+internal class NavGraphContainerFileSpecFactory {
 
-    fun create(rootRouteGraph: RootRouteGraphDeclaration): FileSpec {
+    fun create(rootRouteGraph: NavGraphContainerDeclaration): FileSpec {
         return FileSpec.builder(
             rootRouteGraph.packageName,
             rootRouteGraph.name,
         ).apply {
-            rootRouteGraph.routeGraphs.forEach { routeGraph ->
+            rootRouteGraph.links.forEach { routeGraph ->
                 if (routeGraph.packageName.isNotEmpty()) {
                     addImport(routeGraph.packageName, routeGraph.name)
                 }
@@ -24,7 +24,7 @@ internal class RootRouteGraphFileSpecFactory {
         }.build()
     }
 
-    private fun createFunction(rootRouteGraph: RootRouteGraphDeclaration): FunSpec {
+    private fun createFunction(rootRouteGraph: NavGraphContainerDeclaration): FunSpec {
         return FunSpec.builder(rootRouteGraph.name)
             .apply {
                 receiver(rootRouteGraph.receiverType)
@@ -35,18 +35,19 @@ internal class RootRouteGraphFileSpecFactory {
                         is FunctionParameterType.Query -> Unit
                         FunctionParameterType.Back,
                         FunctionParameterType.Navigate,
-                        FunctionParameterType.Custom -> {
+                        FunctionParameterType.Custom,
+                        -> {
                             addParameter(it.name, it.typeName)
                         }
                     }
                 }
-                rootRouteGraph.routeGraphs.forEach { routeGraph ->
+                rootRouteGraph.links.forEach { routeGraph ->
                     addRouteGraphFunction(routeGraph)
                 }
             }.build()
     }
 
-    private fun FunSpec.Builder.addRouteGraphFunction(routeGraph: RouteGraphDeclaration) {
+    private fun FunSpec.Builder.addRouteGraphFunction(routeGraph: NavGraphDestinationLinkDeclaration) {
         addStatement("%L(", routeGraph.name)
         addCode(
             buildCodeBlock {
@@ -57,7 +58,8 @@ internal class RootRouteGraphFileSpecFactory {
                             is FunctionParameterType.Query -> Unit
                             FunctionParameterType.Back,
                             FunctionParameterType.Navigate,
-                            FunctionParameterType.Custom -> {
+                            FunctionParameterType.Custom,
+                            -> {
                                 addStatement(
                                     "%N = %N,",
                                     it.name,
@@ -67,7 +69,7 @@ internal class RootRouteGraphFileSpecFactory {
                         }
                     }
                 }
-            }
+            },
         )
         addStatement(")")
     }
