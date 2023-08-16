@@ -2,7 +2,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.compose.jb)
+    alias(libs.plugins.compose.multiplatform)
 }
 
 kotlin {

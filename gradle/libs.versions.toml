@@ -1,6 +1,6 @@
 [versions]
 agp = "8.1.0"
-compose-jb = "1.4.3"
+compose-multiplatform = "1.5.0-beta01"
 kotlin = "1.8.20"
 ksp = "1.8.20-1.0.11"
 kotlinpoet = "1.14.2"
@@ -15,7 +15,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-compose-jb = { id = "org.jetbrains.compose", version.ref = "compose-jb" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
