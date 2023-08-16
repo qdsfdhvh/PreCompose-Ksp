@@ -13,7 +13,7 @@ plugins {
 
 allprojects {
     group = "io.github.qdsfdhvh"
-    version = "1.0.9"
+    version = "1.1.0"
 
     plugins.withId("com.vanniktech.maven.publish.base") {
         mavenPublishing {
