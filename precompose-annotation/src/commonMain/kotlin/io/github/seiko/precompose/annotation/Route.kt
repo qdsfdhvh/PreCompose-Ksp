@@ -33,3 +33,7 @@ annotation class Navigate
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Back
+
+@Retention(AnnotationRetention.BINARY)
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class Ignore

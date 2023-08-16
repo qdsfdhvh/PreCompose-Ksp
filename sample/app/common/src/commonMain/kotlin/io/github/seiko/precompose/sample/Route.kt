@@ -3,6 +3,7 @@ package io.github.seiko.precompose.sample
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.seiko.precompose.annotation.Back
+import io.github.seiko.precompose.annotation.Ignore
 import io.github.seiko.precompose.annotation.NavGraphContainer
 import io.github.seiko.precompose.annotation.Navigate
 import io.github.seiko.precompose.demo.SocialRoute
@@ -28,11 +29,15 @@ fun Route(modifier: Modifier = Modifier) {
     }
 }
 
-@Suppress("NO_ACTUAL_FOR_EXPECT")
 @NavGraphContainer
-expect fun RouteBuilder.generateRoute(
+internal fun RouteBuilder.generateRoute(
     navigator: Navigator,
     @Back onBack: () -> Unit,
     @Navigate onNavigate: (String) -> Unit,
     onWebNavigate: (String) -> Unit,
-)
+    @Ignore doNotUse: DoNotUse = DoNotUse,
+) {
+    throw RuntimeException("Route generation failed. Check your ksp settings.")
+}
+
+internal object DoNotUse
