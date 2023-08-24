@@ -15,7 +15,7 @@ import io.github.seiko.precompose.annotation.Navigate
 
 @NavGraphDestination(
     route = WalletRoute.Collectible,
-    deepLinks = DeepLinks.WalletCollectible,
+    deepLinks = [DeepLinks.WalletCollectible],
 )
 @Composable
 fun WalletCollectibleScene(

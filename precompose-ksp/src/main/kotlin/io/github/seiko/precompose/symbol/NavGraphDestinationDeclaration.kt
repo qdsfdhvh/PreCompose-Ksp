@@ -2,11 +2,14 @@ package io.github.seiko.precompose.symbol
 
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.TypeName
 import io.github.seiko.precompose.annotation.NavGraphDestination
 import io.github.seiko.precompose.code.routeBuilderType
+import kotlin.reflect.KClass
 
 internal data class NavGraphDestinationDeclaration(
     val route: String,
@@ -28,9 +31,10 @@ internal fun NavGraphDestinationDeclaration.Companion.of(
     ksFunction: KSFunctionDeclaration,
 ): NavGraphDestinationDeclaration {
     val annotation = ksFunction.getAnnotationsByType(NavGraphDestination::class).first()
+    val fixAnnotation = ksFunction.getFirstKSAnnotationsByType(NavGraphDestination::class)
     return NavGraphDestinationDeclaration(
         route = annotation.route,
-        deepLinks = annotation.deepLinks.split(',').filterNot { it.isEmpty() },
+        deepLinks = fixAnnotation.getValue<List<String>>("deepLinks") ?: emptyList(),
         fileName = "${ksFunction.packageName.asString()}.${ksFunction.simpleName.asString()}"
             .replace(".", "_")
             .replace("`", ""),
@@ -42,4 +46,18 @@ internal fun NavGraphDestinationDeclaration.Companion.of(
         parameters = ksFunction.parameters.map { FunctionParameter.of(it) },
         containingFile = ksFunction.containingFile,
     )
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> KSAnnotation.getValue(name: String): T? {
+    println(arguments.joinToString { it.name?.asString().orEmpty() + "|" + it.value })
+    return arguments.firstOrNull { it.name?.asString() == name }
+        ?.value as? T
+}
+
+fun <T : Annotation> KSAnnotated.getFirstKSAnnotationsByType(annotationKClass: KClass<T>): KSAnnotation {
+    return this.annotations.filter {
+        it.shortName.getShortName() == annotationKClass.simpleName && it.annotationType.resolve().declaration
+            .qualifiedName?.asString() == annotationKClass.qualifiedName
+    }.first()
 }

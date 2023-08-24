@@ -15,7 +15,7 @@ import io.github.seiko.precompose.annotation.Navigate
 
 @NavGraphDestination(
     route = SocialRoute.Profile,
-    deepLinks = DeepLinks.SocialProfile,
+    deepLinks = [DeepLinks.SocialProfile],
 )
 @Composable
 fun SocialProfileScene(

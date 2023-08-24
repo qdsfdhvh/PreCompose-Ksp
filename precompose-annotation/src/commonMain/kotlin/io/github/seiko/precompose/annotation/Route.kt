@@ -8,8 +8,8 @@ annotation class NavGraphContainer
 @Target(AnnotationTarget.FUNCTION)
 annotation class NavGraphDestination(
     val route: String,
-    // split with ','
-    val deepLinks: String = "",
+    // [] not support for js
+    val deepLinks: Array<String> = emptyArray(),
     val packageName: String = "",
     val functionName: String = "scene",
 )

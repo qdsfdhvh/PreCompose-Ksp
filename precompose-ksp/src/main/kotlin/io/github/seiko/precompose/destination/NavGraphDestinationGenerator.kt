@@ -17,7 +17,7 @@ internal class NavGraphDestinationGenerator(
             val fileSpec = navGraphDestinationFileSpecFactory.create(navGraphDestination)
             fileGenerator.createNewFile(
                 fileSpec = fileSpec,
-                dependencies = Dependencies(true, navGraphDestination.containingFile!!),
+                dependencies = Dependencies(false, navGraphDestination.containingFile!!),
             )
         }
     }
