@@ -1,6 +1,6 @@
 package io.github.seiko.precompose.demo
 
 object DeepLinks {
-    const val SocialProfile = "demo://social/profile"
-    const val WalletCollectible = "demo://wallet/collectible"
+    const val SOCIAL_PROFILE = "demo://social/profile"
+    const val WALLET_COLLECTIBLE = "demo://wallet/collectible"
 }

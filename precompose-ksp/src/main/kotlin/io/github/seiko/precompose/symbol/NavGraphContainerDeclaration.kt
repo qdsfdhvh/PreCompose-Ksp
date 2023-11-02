@@ -32,7 +32,9 @@ internal fun NavGraphContainerDeclaration.Companion.of(
         modifiers = ksFunction.modifiers.mapNotNull {
             if (it.name == KModifier.EXPECT.name) {
                 KModifier.ACTUAL
-            } else it.toKModifier()
+            } else {
+                it.toKModifier()
+            }
         },
         parameters = ksFunction.parameters
             .filterNot { it.isAnnotationPresent(Ignore::class) }

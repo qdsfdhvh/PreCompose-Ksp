@@ -6,7 +6,12 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    ios()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    js {
+        browser()
+    }
     sourceSets {
         val commonMain by getting {
             kotlin.srcDir("src/commonMain/route")

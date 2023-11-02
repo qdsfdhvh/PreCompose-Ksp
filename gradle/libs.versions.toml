@@ -1,13 +1,13 @@
 [versions]
-agp = "8.1.0"
-compose-multiplatform = "1.5.0-beta01"
-kotlin = "1.8.20"
-ksp = "1.8.20-1.0.11"
+agp = "8.1.2"
+compose-multiplatform = "1.5.10"
+kotlin = "1.9.20"
+ksp = "1.9.20-1.0.13"
 kotlinpoet = "1.14.2"
-precompose = "1.5.0-beta01"
+precompose = "1.5.4"
 publish = "0.25.3"
-spotless = "6.20.0"
-ktlint = "0.49.1"
+spotless = "6.22.0"
+ktlint = "0.50.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

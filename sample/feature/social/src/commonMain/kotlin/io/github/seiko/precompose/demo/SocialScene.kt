@@ -15,7 +15,7 @@ import io.github.seiko.precompose.annotation.Navigate
 
 @NavGraphDestination(
     route = SocialRoute.Profile,
-    deepLinks = [DeepLinks.SocialProfile],
+    deepLinks = [DeepLinks.SOCIAL_PROFILE],
 )
 @Composable
 fun SocialProfileScene(
@@ -40,7 +40,7 @@ fun SocialProfileScene(
             Button(onClick = { onNavigate(SocialRoute.Relation) }) {
                 Text("Relation")
             }
-            Button(onClick = { onNavigate(DeepLinks.WalletCollectible) }) {
+            Button(onClick = { onNavigate(DeepLinks.WALLET_COLLECTIBLE) }) {
                 Text("Wallet")
             }
         }

@@ -7,7 +7,12 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    ios()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    js {
+        browser()
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -26,6 +31,7 @@ dependencies {
     add("kspDesktop", projects.precomposeKsp)
     add("kspIosX64", projects.precomposeKsp)
     add("kspIosArm64", projects.precomposeKsp)
+    add("kspJs", projects.precomposeKsp)
 }
 
 ksp {

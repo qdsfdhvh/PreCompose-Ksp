@@ -38,7 +38,7 @@ internal class NavGraphContainerGenerator(
         if (containers.none()) return null
 
         val links = resolver
-            .getDeclarationsFromPackage(packageName ?: Names.routeGraphPackageName)
+            .getDeclarationsFromPackage(packageName ?: Names.ROOT_GRAPH_PACKAGE_NAME)
             .filterIsInstance<KSFunctionDeclaration>()
             .map { NavGraphDestinationLinkDeclaration.of(it) }
         return containers.map { NavGraphContainerDeclaration.of(it, links) }.first()

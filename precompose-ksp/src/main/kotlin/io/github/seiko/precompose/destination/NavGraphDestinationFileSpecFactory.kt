@@ -16,7 +16,7 @@ internal class NavGraphDestinationFileSpecFactory(
 
     fun create(destination: NavGraphDestinationDeclaration): FileSpec {
         return FileSpec.builder(
-            packageName ?: Names.routeGraphPackageName,
+            packageName ?: Names.ROOT_GRAPH_PACKAGE_NAME,
             destination.fileName,
         ).apply {
             if (destination.packageName.isNotEmpty()) {
